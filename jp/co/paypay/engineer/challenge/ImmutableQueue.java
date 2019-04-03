@@ -17,13 +17,13 @@ public final class ImmutableQueue<T> implements Queue<T> {
 	/*
 	 * Node for holds the element. Root node's element is always null.
 	 */
-	private final QueueNode<T> elementsNode;
+	private final QueueNode<T> rootNode;
 
 	/**
 	 * Default constructor. Create an empty Queue.
 	 */
 	public ImmutableQueue() {
-		this.elementsNode = new QueueNode<>(null, null);
+		this.rootNode = null;
 	}
 
 	/**
@@ -34,13 +34,18 @@ public final class ImmutableQueue<T> implements Queue<T> {
 	 */
 	public ImmutableQueue(final Collection<T> collection) {
 
-		// Create a root node always null.
-		this.elementsNode = new QueueNode<>(null, null);
+		if (collection == null || collection.isEmpty()) {
+			this.rootNode = null;
+			return;
+		}
 
 		final Iterator<T> iterator = collection.iterator();
 
+		// Create a root node
+		this.rootNode = new QueueNode<>(iterator.next(), null);
+
 		while (iterator.hasNext()) {
-			this.add(iterator.next(), this.elementsNode);
+			this.add(iterator.next());
 		}
 	}
 
@@ -51,18 +56,17 @@ public final class ImmutableQueue<T> implements Queue<T> {
 	 */
 	private ImmutableQueue(final QueueNode<T> queueNode) {
 
-		this.elementsNode = queueNode;
+		this.rootNode = queueNode;
 	}
 
 	/**
 	 * Private method to add the element into queue's node.
 	 *
-	 * @param t          the element to add
-	 * @param targetNode a node
+	 * @param t the element to add
 	 */
-	private void add(final T t, final QueueNode<T> targetNode) {
+	private void add(final T t) {
 
-		QueueNode<T> tail = targetNode;
+		QueueNode<T> tail = this.rootNode;
 
 		while (tail.next != null) {
 			tail = tail.next;
@@ -84,17 +88,9 @@ public final class ImmutableQueue<T> implements Queue<T> {
 			throw new NullPointerException();
 		}
 
-		final QueueNode<T> newRootNode = new QueueNode<>(null, null);
+		final QueueNode<T> newRootNode = new QueueNode<>(t, null);
 
-		// Add the parameter to the head
-		add(t, newRootNode);
-
-		QueueNode<T> tail = this.elementsNode;
-
-		while (tail.next != null) {
-			add(tail.next.element, newRootNode);
-			tail = tail.next;
-		}
+		newRootNode.next = this.rootNode;
 
 		return new ImmutableQueue<>(newRootNode);
 	}
@@ -111,16 +107,7 @@ public final class ImmutableQueue<T> implements Queue<T> {
 			throw new NoSuchElementException();
 		}
 
-		final QueueNode<T> newRootNode = new QueueNode<>(null, null);
-
-		QueueNode<T> tail = this.elementsNode.next;
-
-		while (tail.next != null) {
-			add(tail.next.element, newRootNode);
-			tail = tail.next;
-		}
-
-		return new ImmutableQueue<>(newRootNode);
+		return new ImmutableQueue<>(this.rootNode.next);
 	}
 
 	/**
@@ -134,7 +121,7 @@ public final class ImmutableQueue<T> implements Queue<T> {
 		if (isEmpty()) {
 			return null;
 		}
-		return this.elementsNode.next.element;
+		return this.rootNode.element;
 	}
 
 	/**
@@ -144,7 +131,7 @@ public final class ImmutableQueue<T> implements Queue<T> {
 	 */
 	@Override
 	public boolean isEmpty() {
-		return this.elementsNode.next == null;
+		return this.rootNode == null;
 	}
 
 	/**
@@ -159,7 +146,7 @@ public final class ImmutableQueue<T> implements Queue<T> {
 			return "[]";
 		}
 
-		QueueNode<T> tail = this.elementsNode.next;
+		QueueNode<T> tail = this.rootNode;
 
 		final StringBuilder sb = new StringBuilder();
 
