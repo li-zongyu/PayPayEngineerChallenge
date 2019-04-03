@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 public final class ImmutableQueue<T> implements Queue<T> {
 
 	/*
-	 * Node for holds the element. Root node's element is always null.
+	 * Node for holds the element.
 	 */
 	private final QueueNode<T> rootNode;
 
